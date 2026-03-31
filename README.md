@@ -148,6 +148,7 @@ POST /api/run   { "algorithm": "...", "start": "1", "end": "14", "beam_width": 3
 - HC con Backtracking incluye además entradas con `"action": "backtrack"` y campo `cost_undone`.
 - Decision Tree incluye campos `predicted` y `used_fallback` en cada paso.
 - Beam Search incluye campo `beam_width` en la respuesta y pasos con `"action": "expand"`.
+- Q-Learning incluye campo `episodes` en la respuesta y campo `q_value` en cada paso.
 
 ---
 
@@ -159,6 +160,9 @@ POST /api/run   { "algorithm": "...", "start": "1", "end": "14", "beam_width": 3
 | Hill Climbing con Backtracking | `hill_climbing_backtracking` | ✅ | Sí | No |
 | Aprendizaje Supervisado — Árbol de Decisión | `decision_tree` | ✅ | No | No |
 | Beam Search | `beam_search` | ✅ | No | No |
+| Q-Learning (Aprendizaje por Refuerzo) | `q_learning` | ✅ | Sí* | Sí* |
+
+> *Q-Learning garantiza óptimo tras convergencia (~496,000 episodios de entrenamiento).
 
 ### Hill Climbing
 
@@ -186,3 +190,14 @@ Búsqueda heurística que explora el grafo nivel por nivel manteniendo las β ru
 - **No es completo:** un β pequeño puede descartar la única ruta al destino. Si no encuentra solución, incrementar β.
 - **No es óptimo:** puede conservar rutas baratas al inicio que terminan en callejones sin salida.
 - **Heurística:** costo acumulado (el grafo no tiene coordenadas espaciales para usar distancia euclidiana).
+
+### Q-Learning (Aprendizaje por Refuerzo)
+
+Algoritmo de Aprendizaje por Refuerzo no supervisado. El agente explora el grafo por sí solo y aprende una tabla Q de forma `(nodo_actual × destino × siguiente_nodo)`. Recompensa: −peso por arista recorrida, +500 al llegar al destino. Tras convergencia garantiza la ruta de menor costo.
+
+- **α = 0.1** (learning rate): estándar en Q-Learning — actualiza sin sobrescribir lo aprendido.
+- **γ = 0.99** (discount factor): cercano a 1 para que la señal de llegada se propague sin atenuarse en rutas largas.
+- **ε-greedy:** ε=1.0 al inicio (exploración total) → ε=0.01 al final (explotación pura).
+- **~496,000 episodios** (500 pasadas × 992 pares): cobertura uniforme de todos los pares de nodos.
+- **No supervisado:** aprende explorando, sin dataset etiquetado. Contrasta con el Árbol de Decisión.
+- **Tiempo reportado:** solo inferencia — el entrenamiento ocurre una vez al arrancar el servidor (singleton).

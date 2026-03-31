@@ -1,0 +1,121 @@
+####################################################################################################
+#                                                                                                  #
+#                                       Lista de Adyacencia                                        #
+#                               Maestría en Inteligencia Artificial                                #
+#                                Inteligencia Artificial y su Ética                                #
+#                                    Examen 1: Unidad I/II/III                                     #
+#                                       Roberto Cruz Lozano                                        #
+#                                       21 de Marzo de 2026                                        #
+#                                                                                                  #
+####################################################################################################
+
+ - Este archivo representa el grafo del examen en formato texto.
+ - Se creó para eliminar ambigüedades de la imagen original del PDF, permitiendo una lectura 
+   precisa de nodos, conexiones y pesos.
+ - Esta lista de adyacencia será la referencia utilizada para la totalidad del examen.
+
+                                 > Formato: NODOx - NODOy : Peso <
+
+ CONSIDERACIONES
+  1. Las aristas son bidireccionales.
+  2. Cada arista se registró una sola vez; al ser bidireccionales, por lo que un arista aparecerá 
+     solo una vez y su inverso no. Ejemplo: 1-2: 28 implica también 2-1: 28.
+  3. Los enlaces sin peso en la imagen original fueron excluidos ya que el enunciado "NOTAS" indica
+     que no son rutas transitables.
+  4. Los nodos 15a y 15b representan dos nodos distintos etiquetados como "15" en la imagen 
+     original.
+  5. No existe arista directa entre 15a y 15b.
+  6. La única conexión entre el subgrafo de nodos [1-10] y el subgrafo de nodos [11-31] es la 
+     arista 6-14: 77.
+  7. Se permite la repetición de nodos en las rutas, ya que el enunciado original en el examen no 
+     lo prohíbe explícitamente.
+  8. Al considerar 15a y 15b como nodos distintos, el total de nodos del grafo es 32 y no 31.
+
+####################################################################################################
+
+# NODO 1
+1 - 2 : 28
+1 - 4 : 28
+1 - 8 : 61
+
+# NODO 2
+2 - 3 : 28
+2 - 8 : 98
+
+# NODO 3
+3 - 5 : 33
+
+# NODO 4
+4 - 7 : 28
+
+# NODO 5
+5 - 6 : 40
+5 - 8 : 44
+
+# NODO 6
+6 - 10 : 69
+6 - 14 : 77
+
+# NODO 7
+7 - 8 : 33
+
+# NODO 8
+8 - 9 : 22
+
+# NODO 9
+9 - 10 : 88
+
+# NODO 11
+11 - 12 : 41
+11 - 15a : 21
+
+# NODO 12
+12 - 14 : 28
+12 - 15b : 91
+12 - 20 : 48
+
+# NODO 13
+13 - 15a : 28
+13 - 15b : 32
+
+# NODO 14
+14 - 15a : 33
+
+# NODO 15b
+15b - 16 : 39
+15b - 24 : 38
+15b - 25 : 19
+
+# NODO 16
+16 - 17 : 88
+
+# NODO 17
+17 - 18 : 17
+17 - 19 : 41
+
+# NODO 20
+20 - 21 : 22
+20 - 24 : 67
+
+# NODO 21
+21 - 22 : 61
+
+# NODO 22
+22 - 23 : 69
+
+# NODO 24
+24 - 28 : 70
+
+# NODO 25
+25 - 28 : 39
+
+# NODO 26
+26 - 27 : 19
+26 - 30 : 40
+
+# NODO 28
+28 - 29 : 33
+28 - 30 : 19
+28 - 31 : 40
+
+####################################################################################################

@@ -91,6 +91,7 @@
     #panel-controls {
       top: calc(84px + 16px);
       left: 16px;
+      z-index: 6;
     }
     .field {
       display: flex;
@@ -282,6 +283,11 @@
       text-align: right;
     }
     .stat-value.empty { color: #6c7086; font-weight: 400; }
+    .stat-value.algo-name {
+      max-width: 140px;
+      word-break: break-word;
+      text-align: right;
+    }
     .stat-value.path  {
       color: #a6e3a1;
       font-size: 0.78rem;
@@ -350,8 +356,8 @@
           <option value="">— Seleccionar —</option>
           <option value="hill_climbing">Hill Climbing</option>
           <option value="hill_climbing_backtracking">Hill Climbing con Backtracking</option>
+          <option value="decision_tree">Aprendizaje Supervisado — Árbol de Decisión</option>
           <option value="beam_search" disabled>Beam Search · próximamente</option>
-          <option value="supervised" disabled>Aprendizaje Supervisado · próximamente</option>
         </select>
         <button id="btn-info" title="Ver descripción del algoritmo">ℹ</button>
       </div>
@@ -391,7 +397,7 @@
     <h2>Estadísticas</h2>
     <div class="stat-row">
       <span class="stat-label">Algoritmo</span>
-      <span class="stat-value empty" id="stat-algorithm">—</span>
+      <span class="stat-value algo-name empty" id="stat-algorithm">—</span>
     </div>
     <div class="stat-row">
       <span class="stat-label">Nodo inicio</span>
@@ -642,7 +648,7 @@
       var algoEl = document.getElementById('sel-algorithm');
       var algoText = algoEl.options[algoEl.selectedIndex].text;
       document.getElementById('stat-algorithm').textContent = algoEl.value ? algoText : '—';
-      document.getElementById('stat-algorithm').className = 'stat-value' + (algoEl.value ? '' : ' empty');
+      document.getElementById('stat-algorithm').className = 'stat-value algo-name' + (algoEl.value ? '' : ' empty');
       document.getElementById('stat-start').textContent = currentStart || '—';
       document.getElementById('stat-start').className = 'stat-value' + (currentStart ? '' : ' empty');
       document.getElementById('stat-end').textContent = currentEnd || '—';
@@ -694,6 +700,17 @@
           'La preferencia greedy (menor peso) se mantiene en cada paso.',
           'Puede explorar muchos caminos antes de llegar al destino.',
           'El único puente entre subgrafos es 6—14 (peso 77): siempre lo alcanzará si hay ruta.'
+        ]
+      },
+      'decision_tree': {
+        title: 'Aprendizaje Supervisado — Árbol de Decisión',
+        text: 'Modelo DecisionTreeClassifier entrenado con rutas óptimas del propio grafo. Aprende reglas if/then del tipo: "si estoy en el nodo X y mi destino es Y → ir a Z". En inferencia aplica esas reglas sin ejecutar ningún algoritmo de búsqueda.',
+        warnings: [
+          'Se usa Classifier (no Regressor): predice el siguiente nodo como clase discreta. Un Regressor predice valores continuos ("nodo 3.7") lo cual no tiene sentido aquí.',
+          'Dataset generado con Dijkstra sobre el propio grafo — el modelo conoce el dominio (data leaking transparente). Si el grafo cambiara, el modelo fallaría.',
+          'En inferencia: si la predicción no es un vecino válido o ya fue visitado, se aplica fallback al vecino no visitado más barato.',
+          'Puede quedar atascado si todos los vecinos ya fueron visitados.',
+          'No garantiza la ruta de menor peso en todos los casos.'
         ]
       },
       'beam_search': {
@@ -749,10 +766,11 @@
     }
 
     document.getElementById('sel-algorithm').addEventListener('change', function () {
+      clearResult();
       renderAlgoDescription(this.value);
-      // Si ya estaba abierta y cambia el algoritmo, actualiza el contenido
       if (descOpen && !this.value) setDescVisible(false);
       updateStats();
+      checkReady();
     });
 
     document.getElementById('btn-info').addEventListener('click', function () {

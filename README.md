@@ -23,7 +23,8 @@ mia-iae-examen2/
 │   │   ├── hill_climbing.py                      # Hill Climbing greedy
 │   │   ├── hill_climbing_backtracking.py         # Hill Climbing con Backtracking
 │   │   ├── decision_tree.py                      # Aprendizaje Supervisado — Árbol de Decisión
-│   │   └── beam_search.py                        # Beam Search con ancho de haz configurable
+│   │   ├── beam_search.py                        # Beam Search con ancho de haz configurable
+│   │   └── q_learning.py                         # Q-Learning (Aprendizaje por Refuerzo)
 │   ├── venv/                                     # Entorno virtual Python (no se commitea)
 │   ├── graph.py                                  # Grafo como lista de adyacencia
 │   ├── main.py                                   # API FastAPI

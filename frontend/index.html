@@ -349,6 +349,7 @@
         <select id="sel-algorithm" style="flex:1;">
           <option value="">— Seleccionar —</option>
           <option value="hill_climbing">Hill Climbing</option>
+          <option value="hill_climbing_backtracking">Hill Climbing con Backtracking</option>
           <option value="beam_search" disabled>Beam Search · próximamente</option>
           <option value="supervised" disabled>Aprendizaje Supervisado · próximamente</option>
         </select>
@@ -682,6 +683,17 @@
           'No garantiza encontrar la ruta óptima global.',
           'Puede fallar si el camino exige pasar por aristas costosas localmente.',
           'El único puente entre subgrafos es 6—14 (peso 77): rutas entre subgrafos dependen de alcanzarlo.'
+        ]
+      },
+      'hill_climbing_backtracking': {
+        title: 'Hill Climbing con Backtracking',
+        text: 'Extiende el Hill Climbing greedy con un mecanismo de recuperación: cuando llega a un callejón sin salida, retrocede al nodo anterior y prueba el siguiente candidato. Al retroceder, el costo de la arista se deshace, por lo que el costo siempre refleja solo la ruta activa.',
+        warnings: [
+          'Es completo: garantiza encontrar una ruta si existe.',
+          'No garantiza la ruta de menor peso — encuentra la primera ruta viable.',
+          'La preferencia greedy (menor peso) se mantiene en cada paso.',
+          'Puede explorar muchos caminos antes de llegar al destino.',
+          'El único puente entre subgrafos es 6—14 (peso 77): siempre lo alcanzará si hay ruta.'
         ]
       },
       'beam_search': {

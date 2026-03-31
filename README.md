@@ -13,18 +13,19 @@ Visualizador interactivo de grafo con implementación de algoritmos de búsqueda
 mia-iae-examen2/
 ├── frontend/
 │   ├── assets/
-│   │   └── logoMIA.png              # Logo de la Maestría (favicon + header)
+│   │   └── logoMIA.png                      # Logo de la Maestría (favicon + header)
 │   ├── libs/
-│   │   └── vis-network.min.js       # vis.js v9.1.9 (vendorizado, sin CDN)
-│   └── index.html                   # Aplicación principal
+│   │   └── vis-network.min.js               # vis.js v9.1.9 (vendorizado, sin CDN)
+│   └── index.html                           # Aplicación principal
 ├── backend/
 │   ├── algorithms/
 │   │   ├── __init__.py
-│   │   └── hill_climbing.py         # Hill Climbing implementado
-│   ├── venv/                        # Entorno virtual Python (no se commitea)
-│   ├── graph.py                     # Grafo como lista de adyacencia
-│   ├── main.py                      # API FastAPI
-│   └── requirements.txt             # fastapi, uvicorn[standard]
+│   │   ├── hill_climbing.py                 # Hill Climbing greedy
+│   │   └── hill_climbing_backtracking.py    # Hill Climbing con Backtracking
+│   ├── venv/                                # Entorno virtual Python (no se commitea)
+│   ├── graph.py                             # Grafo como lista de adyacencia
+│   ├── main.py                              # API FastAPI
+│   └── requirements.txt                     # fastapi, uvicorn[standard]
 ├── Lista_de_Adyacencia_Grafo_Examen.txt
 ├── logoMIA.png
 ├── .gitignore
@@ -38,7 +39,7 @@ mia-iae-examen2/
 
 - **32 nodos:** 1–14, 15a, 15b, 16–31
 - **39 aristas bidireccionales** con peso
-- Un único puente entre los dos subgrafos: arista `6 — 14` (peso 77)
+- Único puente entre los dos subgrafos: arista `6 — 14` (peso 77)
 - Referencia completa: `Lista_de_Adyacencia_Grafo_Examen.txt`
 
 ---
@@ -85,7 +86,7 @@ Aplicación HTML/CSS/JS pura, sin framework ni bundler.
 - Selector de algoritmo con botón `ℹ` que despliega descripción y consideraciones
 - Selector de nodo inicio → se pinta **verde** en el grafo
 - Selector de nodo fin → se pinta **rojo** en el grafo
-- Botón **Ejecutar** (se habilita con algoritmo + dos nodos distintos seleccionados)
+- Botón **Ejecutar** (habilitado solo con algoritmo + dos nodos distintos)
 - Botón **Limpiar resultado**
 - Cambiar nodo inicio/fin limpia el resultado anterior automáticamente
 
@@ -94,7 +95,7 @@ Aplicación HTML/CSS/JS pura, sin framework ni bundler.
 - Costo total, nodos visitados, longitud de ruta, tiempo de ejecución
 - Camino completo con formato `nodo → nodo → ...`
 
-**Visualización del resultado**
+**Visualización del resultado en el grafo**
 - Nodos del camino pintados en **amarillo**
 - Aristas del camino resaltadas en **amarillo** (grosor mayor)
 - Nodo atascado pintado en **naranja**
@@ -106,14 +107,14 @@ Aplicación HTML/CSS/JS pura, sin framework ni bundler.
 
 API REST en Python con FastAPI.
 
-### Endpoint principal
+### Endpoints
 
 ```
-POST /api/run
-Body: { "algorithm": "hill_climbing", "start": "1", "end": "14" }
+GET  /api/health
+POST /api/run   { "algorithm": "...", "start": "1", "end": "14" }
 ```
 
-**Respuesta:**
+**Respuesta de `/api/run`:**
 ```json
 {
   "algorithm": "hill_climbing",
@@ -124,6 +125,7 @@ Body: { "algorithm": "hill_climbing", "start": "1", "end": "14" }
   "cost": 206,
   "steps": [
     {
+      "action": "move",
       "from": "1",
       "to": "2",
       "weight": 28,
@@ -136,18 +138,28 @@ Body: { "algorithm": "hill_climbing", "start": "1", "end": "14" }
 }
 ```
 
+Los pasos de HC con Backtracking incluyen adicionalmente entradas con `"action": "backtrack"`.
+
 ---
 
 ## Algoritmos
 
-| Algoritmo | Estado | Tipo | Descripción |
-|-----------|--------|------|-------------|
-| Hill Climbing | ✅ Implementado | Local / Greedy | En cada paso elige el vecino no visitado con menor peso de arista |
-| Beam Search | 🔜 Próximamente | Informado | Mantiene los k mejores candidatos en cada nivel |
-| Aprendizaje Supervisado | 🔜 Próximamente | Supervisado | Modelo entrenado para predecir el siguiente nodo en la ruta óptima |
+| Algoritmo | Clave API | Estado | Garantiza ruta | Garantiza óptimo |
+|-----------|-----------|--------|---------------|-----------------|
+| Hill Climbing | `hill_climbing` | ✅ | No | No |
+| Hill Climbing con Backtracking | `hill_climbing_backtracking` | ✅ | Sí | No |
+| Beam Search | `beam_search` | 🔜 | No | No |
+| Aprendizaje Supervisado | `supervised` | 🔜 | — | — |
 
-### Consideraciones de Hill Climbing
-- Puede quedar atascado en nodos hoja que no sean el destino
-- No garantiza encontrar la ruta óptima global
-- Puede fallar si el camino exige pasar por aristas costosas localmente
-- El único puente entre subgrafos es `6—14` (peso 77)
+### Notas sobre los algoritmos implementados
+
+**Hill Climbing**
+- Elige en cada paso el vecino no visitado con menor peso (greedy local)
+- Puede quedarse atascado en nodos hoja o callejones sin salida
+- No garantiza encontrar el destino ni la ruta de menor costo
+
+**Hill Climbing con Backtracking**
+- Misma estrategia greedy que HC puro
+- Cuando se atasca, retrocede al nodo anterior y prueba el siguiente candidato
+- Al retroceder deshace el costo — el costo siempre refleja solo la ruta activa
+- Garantiza encontrar una ruta si existe; no garantiza que sea la de menor costo

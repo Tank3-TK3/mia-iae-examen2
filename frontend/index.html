@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examen 2</title>
+  <link rel="icon" type="image/png" href="assets/logoMIA.png" />
+  <script src="libs/vis-network.min.js"></script>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 84px;
+      background: #181825;
+      border-bottom: 1px solid #313244;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 20px;
+      z-index: 10;
+    }
+    header img.logo {
+      height: 62px; width: auto;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    header h1 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #cdd6f4;
+      white-space: nowrap;
+    }
+    .divider {
+      width: 1px; height: 24px;
+      background: #313244;
+    }
+    .control-group {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .control-group label {
+      font-size: 0.72rem; color: #6c7086; white-space: nowrap;
+    }
+    .control-group input[type="range"] {
+      width: 90px; accent-color: #89b4fa; cursor: pointer;
+    }
+    .control-group .val {
+      font-size: 0.72rem; color: #89b4fa;
+      width: 24px; text-align: right;
+    }
+
+    /* ── GRAPH CONTAINER ────────────────────────────────────── */
+    #graph-container {
+      position: fixed;
+      top: 84px; left: 0; right: 0; bottom: 28px;
+    }
+
+    /* ── OVERLAY PANELS (estilo leyenda de mapa) ────────────── */
+    .map-panel {
+      position: fixed;
+      background: rgba(24, 24, 37, 0.92);
+      border: 1px solid #313244;
+      border-radius: 10px;
+      padding: 14px 16px;
+      z-index: 5;
+      backdrop-filter: blur(6px);
+      min-width: 200px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    .map-panel h2 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6c7086;
+      margin: 0 0 12px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #313244;
+    }
+
+    /* Panel izquierdo — controles */
+    #panel-controls {
+      top: calc(84px + 16px);
+      left: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .field label {
+      font-size: 0.68rem;
+      color: #6c7086;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field select {
+      background: #313244;
+      border: 1px solid #45475a;
+      color: #cdd6f4;
+      font-size: 0.82rem;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236c7086'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 24px;
+    }
+    .field select:focus {
+      border-color: #89b4fa;
+    }
+    .field select:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #btn-ejecutar {
+      width: 100%;
+      margin-top: 4px;
+      padding: 7px 0;
+      background: #89b4fa;
+      color: #1e1e2e;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      letter-spacing: 0.03em;
+    }
+    #btn-ejecutar:disabled {
+      background: #313244;
+      color: #585b70;
+      cursor: not-allowed;
+    }
+    #btn-ejecutar:not(:disabled):hover {
+      background: #b4d0fe;
+    }
+
+    /* Indicadores nodo inicio / fin */
+    .node-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+    .badge-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .badge-dot.start { background: #a6e3a1; }
+    .badge-dot.end   { background: #f38ba8; }
+
+    /* Panel derecho — estadísticas */
+    #panel-stats {
+      top: calc(84px + 16px);
+      right: 16px;
+      min-width: 220px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #1e1e2e;
+      gap: 12px;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label {
+      font-size: 0.72rem;
+      color: #6c7086;
+      white-space: nowrap;
+    }
+    .stat-value {
+      font-size: 0.82rem;
+      color: #cdd6f4;
+      font-weight: 600;
+      text-align: right;
+    }
+    .stat-value.empty { color: #45475a; font-weight: 400; }
+    .stat-value.path  {
+      color: #a6e3a1;
+      font-size: 0.72rem;
+      max-width: 140px;
+      word-break: break-all;
+      text-align: right;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 28px;
+      background: #181825;
+      border-top: 1px solid #313244;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    footer span { font-size: 0.7rem; color: #6c7086; letter-spacing: 0.03em; }
+    footer .author { color: #a6adc8; font-weight: 500; }
+    footer .author em { font-style: normal; color: #89b4fa; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<header>
+  <img class="logo" src="assets/logoMIA.png" alt="Logo MIA" />
+  <h1>Maestría en Inteligencia Artificial</h1>
+
+  <div class="divider"></div>
+
+  <div class="control-group">
+    <label>Nodos</label>
+    <input type="range" id="slider-nodes" min="10" max="48" value="20" step="1" />
+    <span class="val" id="val-nodes">20</span>
+  </div>
+
+  <div class="control-group">
+    <label>Pesos</label>
+    <input type="range" id="slider-edges" min="10" max="48" value="16" step="1" />
+    <span class="val" id="val-edges">16</span>
+  </div>
+</header>
+
+<!-- ── PANELES OVERLAY ─────────────────────────────────────── -->
+
+  <!-- Panel izquierdo: controles -->
+  <div class="map-panel" id="panel-controls">
+    <h2>Configuración</h2>
+
+    <div class="field">
+      <label>Algoritmo</label>
+      <select id="sel-algorithm" disabled>
+        <option value="">— Próximamente —</option>
+        <option value="bfs">BFS · Búsqueda por amplitud</option>
+        <option value="dfs">DFS · Búsqueda por profundidad</option>
+        <option value="astar">A* · Heurística</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>
+        <span class="node-badge"><span class="badge-dot start"></span>Nodo inicio</span>
+      </label>
+      <select id="sel-start">
+        <option value="">— Seleccionar —</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>
+        <span class="node-badge"><span class="badge-dot end"></span>Nodo fin</span>
+      </label>
+      <select id="sel-end">
+        <option value="">— Seleccionar —</option>
+      </select>
+    </div>
+
+    <button id="btn-ejecutar" disabled>Ejecutar</button>
+  </div>
+
+  <!-- Panel derecho: estadísticas -->
+  <div class="map-panel" id="panel-stats">
+    <h2>Estadísticas</h2>
+    <div class="stat-row">
+      <span class="stat-label">Algoritmo</span>
+      <span class="stat-value empty" id="stat-algorithm">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Nodo inicio</span>
+      <span class="stat-value empty" id="stat-start">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Nodo fin</span>
+      <span class="stat-value empty" id="stat-end">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Costo total</span>
+      <span class="stat-value empty" id="stat-cost">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Nodos visitados</span>
+      <span class="stat-value empty" id="stat-visited">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Longitud ruta</span>
+      <span class="stat-value empty" id="stat-length">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Tiempo</span>
+      <span class="stat-value empty" id="stat-time">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Camino</span>
+      <span class="stat-value path empty" id="stat-path">—</span>
+    </div>
+  </div>
+
+<!-- ── GRAFO ───────────────────────────────────────────────── -->
+<div id="graph-container"></div>
+
+<!-- ── FOOTER ──────────────────────────────────────────────── -->
+<footer>
+  <span>Maestría en Inteligencia Artificial &mdash; Inteligencia Artificial y su Ética &mdash; Examen 2</span>
+  <span class="author">Elaborado por <em>Roberto Cruz Lozano</em></span>
+</footer>
+
+<script>
+  window.addEventListener('load', function () {
+
+    var nodeFontSize = parseInt(localStorage.getItem('font-nodes') || '20');
+    var edgeFontSize = parseInt(localStorage.getItem('font-edges') || '16');
+
+    var sliderNodes = document.getElementById('slider-nodes');
+    var sliderEdges = document.getElementById('slider-edges');
+    var valNodes    = document.getElementById('val-nodes');
+    var valEdges    = document.getElementById('val-edges');
+    sliderNodes.value    = nodeFontSize;
+    sliderEdges.value    = edgeFontSize;
+    valNodes.textContent = nodeFontSize;
+    valEdges.textContent = edgeFontSize;
+
+    // ── Colores base ──────────────────────────────────────────
+    var COLOR_DEFAULT = { background: '#313244', border: '#89b4fa' };
+    var COLOR_START   = { background: '#1c3a2a', border: '#a6e3a1' };
+    var COLOR_END     = { background: '#3a1c26', border: '#f38ba8' };
+
+    // ── Dataset de nodos ──────────────────────────────────────
+    var NODE_IDS = ['1','2','3','4','5','6','7','8','9','10',
+                    '11','12','13','14','15a','15b',
+                    '16','17','18','19','20','21','22','23',
+                    '24','25','26','27','28','29','30','31'];
+
+    var nodes = new vis.DataSet(NODE_IDS.map(function (id) {
+      return { id: id, label: id };
+    }));
+
+    var edges = new vis.DataSet([
+      { id:  1, from: '1',   to: '2',   label: '28' },
+      { id:  2, from: '1',   to: '4',   label: '28' },
+      { id:  3, from: '1',   to: '8',   label: '61' },
+      { id:  4, from: '2',   to: '3',   label: '28' },
+      { id:  5, from: '2',   to: '8',   label: '98' },
+      { id:  6, from: '3',   to: '5',   label: '33' },
+      { id:  7, from: '4',   to: '7',   label: '28' },
+      { id:  8, from: '5',   to: '6',   label: '40' },
+      { id:  9, from: '5',   to: '8',   label: '44' },
+      { id: 10, from: '6',   to: '10',  label: '69' },
+      { id: 11, from: '6',   to: '14',  label: '77' },
+      { id: 12, from: '7',   to: '8',   label: '33' },
+      { id: 13, from: '8',   to: '9',   label: '22' },
+      { id: 14, from: '9',   to: '10',  label: '88' },
+      { id: 15, from: '11',  to: '12',  label: '41' },
+      { id: 16, from: '11',  to: '15a', label: '21' },
+      { id: 17, from: '12',  to: '14',  label: '28' },
+      { id: 18, from: '12',  to: '15b', label: '91' },
+      { id: 19, from: '12',  to: '20',  label: '48' },
+      { id: 20, from: '13',  to: '15a', label: '28' },
+      { id: 21, from: '13',  to: '15b', label: '32' },
+      { id: 22, from: '14',  to: '15a', label: '33' },
+      { id: 23, from: '15b', to: '16',  label: '39' },
+      { id: 24, from: '15b', to: '24',  label: '38' },
+      { id: 25, from: '15b', to: '25',  label: '19' },
+      { id: 26, from: '16',  to: '17',  label: '88' },
+      { id: 27, from: '17',  to: '18',  label: '17' },
+      { id: 28, from: '17',  to: '19',  label: '41' },
+      { id: 29, from: '20',  to: '21',  label: '22' },
+      { id: 30, from: '20',  to: '24',  label: '67' },
+      { id: 31, from: '21',  to: '22',  label: '61' },
+      { id: 32, from: '22',  to: '23',  label: '69' },
+      { id: 33, from: '24',  to: '28',  label: '70' },
+      { id: 34, from: '25',  to: '28',  label: '39' },
+      { id: 35, from: '26',  to: '27',  label: '19' },
+      { id: 36, from: '26',  to: '30',  label: '40' },
+      { id: 37, from: '28',  to: '29',  label: '33' },
+      { id: 38, from: '28',  to: '30',  label: '19' },
+      { id: 39, from: '28',  to: '31',  label: '40' },
+    ]);
+
+    var options = {
+      nodes: {
+        shape: 'ellipse',
+        widthConstraint: { minimum: 46, maximum: 46 },
+        heightConstraint: { minimum: 46 },
+        font: { size: nodeFontSize, color: '#cdd6f4' },
+        color: {
+          background: COLOR_DEFAULT.background,
+          border: COLOR_DEFAULT.border,
+          highlight: { background: '#cba6f7', border: '#f5c2e7' },
+          hover:     { background: '#45475a', border: '#89dceb' }
+        },
+        borderWidth: 2,
+        shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 8, x: 2, y: 2 }
+      },
+      edges: {
+        font: {
+          size: edgeFontSize,
+          color: '#f38ba8',
+          strokeWidth: 3,
+          strokeColor: '#1e1e2e',
+          align: 'middle'
+        },
+        color: { color: '#585b70', highlight: '#cba6f7', hover: '#89dceb' },
+        width: 2, hoverWidth: 3, selectionWidth: 3,
+        smooth: { enabled: true, type: 'dynamic' },
+        arrows: { to: false }
+      },
+      physics: {
+        enabled: true,
+        solver: 'barnesHut',
+        barnesHut: {
+          gravitationalConstant: -6000,
+          centralGravity: 0.3,
+          springLength: 140,
+          springConstant: 0.04,
+          damping: 0.09,
+          avoidOverlap: 0.5
+        },
+        stabilization: { enabled: true, iterations: 500, updateInterval: 25 }
+      },
+      interaction: {
+        hover: true,
+        zoomView: false, dragView: false,
+        dragNodes: true,
+        navigationButtons: false, keyboard: false
+      }
+    };
+
+    // ── Restaurar posiciones ──────────────────────────────────
+    var saved = localStorage.getItem('graph-positions');
+    if (saved) {
+      var positions = JSON.parse(saved);
+      nodes.forEach(function (node) {
+        if (positions[node.id]) {
+          nodes.update({ id: node.id, x: positions[node.id].x, y: positions[node.id].y, fixed: false });
+        }
+      });
+      options.physics.enabled = false;
+    }
+
+    var container = document.getElementById('graph-container');
+    var network = new vis.Network(container, { nodes: nodes, edges: edges }, options);
+
+    network.on('stabilizationIterationsDone', function () {
+      network.setOptions({ physics: { enabled: false } });
+      network.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+    });
+    if (saved) {
+      network.once('afterDrawing', function () { network.fit({ animation: false }); });
+    }
+
+    // ── Sliders tamaño fuente ─────────────────────────────────
+    sliderNodes.addEventListener('input', function () {
+      var s = parseInt(this.value);
+      valNodes.textContent = s;
+      localStorage.setItem('font-nodes', s);
+      network.setOptions({ nodes: { font: { size: s } } });
+    });
+    sliderEdges.addEventListener('input', function () {
+      var s = parseInt(this.value);
+      valEdges.textContent = s;
+      localStorage.setItem('font-edges', s);
+      network.setOptions({ edges: { font: { size: s } } });
+    });
+
+    // ── Guardar posiciones ────────────────────────────────────
+    network.on('dragEnd', function (params) {
+      if (params.nodes.length === 0) return;
+      localStorage.setItem('graph-positions', JSON.stringify(network.getPositions()));
+    });
+
+    // ── Poblar selectores de nodos ────────────────────────────
+    var selStart = document.getElementById('sel-start');
+    var selEnd   = document.getElementById('sel-end');
+
+    NODE_IDS.forEach(function (id) {
+      selStart.add(new Option('Nodo ' + id, id));
+      selEnd.add(new Option('Nodo ' + id, id));
+    });
+
+    var currentStart = null;
+    var currentEnd   = null;
+
+    function resetNodeColor(id) {
+      if (!id) return;
+      nodes.update({ id: id, color: { background: COLOR_DEFAULT.background, border: COLOR_DEFAULT.border } });
+    }
+
+    function applyNodeColor(id, color) {
+      if (!id) return;
+      nodes.update({ id: id, color: { background: color.background, border: color.border } });
+    }
+
+    function updateStats() {
+      var algoEl = document.getElementById('sel-algorithm');
+      var algoText = algoEl.options[algoEl.selectedIndex].text;
+      document.getElementById('stat-algorithm').textContent = algoEl.value ? algoText : '—';
+      document.getElementById('stat-algorithm').className = 'stat-value' + (algoEl.value ? '' : ' empty');
+      document.getElementById('stat-start').textContent = currentStart || '—';
+      document.getElementById('stat-start').className = 'stat-value' + (currentStart ? '' : ' empty');
+      document.getElementById('stat-end').textContent = currentEnd || '—';
+      document.getElementById('stat-end').className = 'stat-value' + (currentEnd ? '' : ' empty');
+    }
+
+    function checkReady() {
+      var ready = currentStart && currentEnd && currentStart !== currentEnd;
+      document.getElementById('btn-ejecutar').disabled = !ready;
+    }
+
+    selStart.addEventListener('change', function () {
+      if (currentStart) resetNodeColor(currentStart);
+      currentStart = this.value || null;
+      if (currentStart) applyNodeColor(currentStart, COLOR_START);
+      updateStats();
+      checkReady();
+    });
+
+    selEnd.addEventListener('change', function () {
+      if (currentEnd) resetNodeColor(currentEnd);
+      currentEnd = this.value || null;
+      if (currentEnd) applyNodeColor(currentEnd, COLOR_END);
+      updateStats();
+      checkReady();
+    });
+
+    // ── Botón ejecutar (listo para conectar con backend) ──────
+    document.getElementById('btn-ejecutar').addEventListener('click', function () {
+      // TODO: conectar con backend
+      console.log('Ejecutar:', {
+        algoritmo: document.getElementById('sel-algorithm').value,
+        inicio: currentStart,
+        fin: currentEnd
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

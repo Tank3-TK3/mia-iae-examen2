@@ -357,9 +357,18 @@
           <option value="hill_climbing">Hill Climbing</option>
           <option value="hill_climbing_backtracking">Hill Climbing con Backtracking</option>
           <option value="decision_tree">Aprendizaje Supervisado — Árbol de Decisión</option>
-          <option value="beam_search" disabled>Beam Search · próximamente</option>
+          <option value="beam_search">Beam Search</option>
         </select>
         <button id="btn-info" title="Ver descripción del algoritmo">ℹ</button>
+      </div>
+    </div>
+
+    <div class="field" id="field-beam" style="display:none;">
+      <label>Ancho de haz (β)</label>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="range" id="slider-beam" min="1" max="5" value="3" step="1"
+               style="flex:1; accent-color:#89b4fa; cursor:pointer;" />
+        <span id="val-beam" style="font-size:0.82rem; color:#89b4fa; font-weight:700; width:16px; text-align:right;">3</span>
       </div>
     </div>
 
@@ -426,6 +435,10 @@
     <div class="stat-row" id="stat-result-row">
       <span class="stat-label">Resultado</span>
       <span class="stat-value" id="stat-result">—</span>
+    </div>
+    <div class="stat-row" id="stat-beam-row" style="display:none;">
+      <span class="stat-label">Ancho β usado</span>
+      <span class="stat-value empty" id="stat-beam">—</span>
     </div>
     <div class="stat-row">
       <span class="stat-label">Camino</span>
@@ -714,12 +727,14 @@
         ]
       },
       'beam_search': {
-        title: 'Beam Search',
-        text: 'Búsqueda informada que mantiene los k mejores candidatos (beam width) en cada nivel. Balancea exploración y eficiencia podando ramas menos prometedoras.',
+        title: 'Beam Search (Búsqueda con Haz)',
+        text: 'Búsqueda heurística que explora el grafo nivel por nivel manteniendo las β rutas parciales de menor costo acumulado (el "haz"). En cada iteración expande todas las rutas del haz, genera sus sucesores y conserva solo los β mejores — podando el resto. No se permite repetición de nodos dentro de una misma ruta. A diferencia de Hill Climbing que sigue una sola ruta greedy, Beam Search explora β caminos en paralelo.',
         warnings: [
-          'Un beam width pequeño puede descartar el camino óptimo.',
-          'No es completo: puede no encontrar solución aunque exista.',
-          'Mayor beam width = más preciso pero más costoso computacionalmente.'
+          'β=1 equivale a Hill Climbing greedy: una sola ruta, sin retroceso.',
+          'No es completo: un β pequeño puede descartar la única ruta al destino.',
+          'No es óptimo: puede conservar rutas baratas al inicio que terminan en callejones sin salida.',
+          'Si no encuentra solución, incrementa β — un haz más amplio permite conservar caminos que inicialmente parecen menos prometedores.',
+          'El único puente entre subgrafos es 6—14 (peso 77): con β pequeño puede ser podado en favor de rutas más baratas que no llegan al destino.'
         ]
       },
       'supervised': {
@@ -765,10 +780,23 @@
       }
     }
 
+    // ── Slider β ─────────────────────────────────────────────
+    var sliderBeam = document.getElementById('slider-beam');
+    var valBeam    = document.getElementById('val-beam');
+    sliderBeam.addEventListener('input', function () {
+      valBeam.textContent = this.value;
+    });
+
+    function toggleBeamField(algo) {
+      var show = algo === 'beam_search';
+      document.getElementById('field-beam').style.display = show ? '' : 'none';
+    }
+
     document.getElementById('sel-algorithm').addEventListener('change', function () {
       clearResult();
       renderAlgoDescription(this.value);
       if (descOpen && !this.value) setDescVisible(false);
+      toggleBeamField(this.value);
       updateStats();
       checkReady();
     });
@@ -806,6 +834,7 @@
         el.className = el.id === 'stat-path' ? 'stat-value path empty' : 'stat-value empty';
       });
       document.getElementById('stat-result-row').classList.remove('visible');
+      document.getElementById('stat-beam-row').style.display = 'none';
       document.getElementById('btn-limpiar').classList.remove('visible');
       lastResult = null;
     }
@@ -866,6 +895,17 @@
       timeEl.textContent = data.time_ms + ' ms';
       timeEl.className = 'stat-value';
 
+      // β (solo beam_search)
+      var beamRow = document.getElementById('stat-beam-row');
+      if (data.beam_width !== undefined) {
+        beamRow.style.display = '';
+        var beamEl = document.getElementById('stat-beam');
+        beamEl.textContent = 'β = ' + data.beam_width;
+        beamEl.className = 'stat-value';
+      } else {
+        beamRow.style.display = 'none';
+      }
+
       // Camino
       var pathEl = document.getElementById('stat-path');
       pathEl.textContent = data.path.join(' → ');
@@ -890,7 +930,12 @@
       fetch('http://localhost:8000/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ algorithm: algo, start: currentStart, end: currentEnd })
+        body: JSON.stringify({
+          algorithm:  algo,
+          start:      currentStart,
+          end:        currentEnd,
+          beam_width: parseInt(document.getElementById('slider-beam').value, 10)
+        })
       })
       .then(function (res) {
         if (!res.ok) return res.json().then(function (e) { throw new Error(e.detail || 'Error del servidor'); });

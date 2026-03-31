@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from graph import GRAPH
-from algorithms import hill_climbing, hill_climbing_backtracking, decision_tree
+from algorithms import hill_climbing, hill_climbing_backtracking, decision_tree, beam_search
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -31,9 +31,10 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 class RunRequest(BaseModel):
-    algorithm: str   # e.g. "hill_climbing"
-    start: str       # source node ID
-    end: str         # destination node ID
+    algorithm: str        # e.g. "hill_climbing"
+    start: str            # source node ID
+    end: str              # destination node ID
+    beam_width: int = 3   # solo usado por beam_search
 
 # ---------------------------------------------------------------------------
 # Supported algorithms registry
@@ -43,6 +44,7 @@ ALGORITHMS = {
     "hill_climbing":              hill_climbing.run,
     "hill_climbing_backtracking": hill_climbing_backtracking.run,
     "decision_tree":              decision_tree.run,
+    "beam_search":                beam_search.run,
 }
 
 # ---------------------------------------------------------------------------
@@ -92,7 +94,10 @@ def run_algorithm(body: RunRequest):
 
     # --- run the algorithm -------------------------------------------------
     algo_fn = ALGORITHMS[body.algorithm]
-    result = algo_fn(start=body.start, end=body.end, graph=GRAPH)
+    kwargs = dict(start=body.start, end=body.end, graph=GRAPH)
+    if body.algorithm == "beam_search":
+        kwargs["beam_width"] = body.beam_width
+    result = algo_fn(**kwargs)
 
     # Echo back the input parameters alongside the algorithm result so the
     # frontend always knows which request produced this response.

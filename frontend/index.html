@@ -48,7 +48,7 @@
       display: flex; align-items: center; gap: 8px;
     }
     .control-group label {
-      font-size: 0.72rem; color: #6c7086; white-space: nowrap;
+      font-size: 0.75rem; color: #9399b2; white-space: nowrap;
     }
     .control-group input[type="range"] {
       width: 90px; accent-color: #89b4fa; cursor: pointer;
@@ -77,11 +77,11 @@
       box-shadow: 0 4px 24px rgba(0,0,0,0.5);
     }
     .map-panel h2 {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #6c7086;
+      color: #9399b2;
       margin: 0 0 12px 0;
       padding-bottom: 8px;
       border-bottom: 1px solid #313244;
@@ -99,8 +99,8 @@
       margin-bottom: 10px;
     }
     .field label {
-      font-size: 0.68rem;
-      color: #6c7086;
+      font-size: 0.72rem;
+      color: #9399b2;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
@@ -150,13 +150,101 @@
     #btn-ejecutar:not(:disabled):hover {
       background: #b4d0fe;
     }
+    #btn-ejecutar.loading {
+      background: #45475a;
+      color: #6c7086;
+      cursor: not-allowed;
+    }
+    #btn-limpiar {
+      width: 100%;
+      margin-top: 6px;
+      padding: 5px 0;
+      background: transparent;
+      border: 1px solid #585b70;
+      color: #9399b2;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: none;
+    }
+    #btn-limpiar.visible { display: block; }
+    #btn-limpiar:hover { border-color: #9399b2; color: #cdd6f4; }
+
+    /* resultado en panel stats */
+    .stat-value.success { color: #a6e3a1; }
+    .stat-value.failure { color: #f38ba8; }
+    #stat-result-row { display: none; }
+    #stat-result-row.visible { display: flex; }
+
+    /* ── DESCRIPCIÓN DEL ALGORITMO ──────────────────────────── */
+    #btn-info {
+      background: transparent;
+      border: 1px solid #585b70;
+      color: #9399b2;
+      font-size: 0.75rem;
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #btn-info:hover, #btn-info.active {
+      border-color: #89b4fa;
+      color: #89b4fa;
+      background: rgba(137,180,250,0.08);
+    }
+
+    #algo-description {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #313244;
+      display: none;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    #algo-description.visible { display: block; }
+    #algo-description::-webkit-scrollbar { width: 4px; }
+    #algo-description::-webkit-scrollbar-track { background: transparent; }
+    #algo-description::-webkit-scrollbar-thumb { background: #45475a; border-radius: 4px; }
+
+    .algo-desc-title {
+      font-size: 1.1em;
+      font-weight: 700;
+      color: #89b4fa;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .algo-desc-text {
+      font-size: 1em;
+      color: #bac2de;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+    .algo-warnings {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .algo-warning {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      font-size: 0.95em;
+      color: #fab387;
+      line-height: 1.6;
+    }
+    .algo-warning .icon { flex-shrink: 0; margin-top: 1px; }
 
     /* Indicadores nodo inicio / fin */
     .node-badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
+      color: #bac2de;
       margin-top: 2px;
     }
     .badge-dot {
@@ -183,8 +271,8 @@
     }
     .stat-row:last-child { border-bottom: none; }
     .stat-label {
-      font-size: 0.72rem;
-      color: #6c7086;
+      font-size: 0.74rem;
+      color: #9399b2;
       white-space: nowrap;
     }
     .stat-value {
@@ -193,10 +281,10 @@
       font-weight: 600;
       text-align: right;
     }
-    .stat-value.empty { color: #45475a; font-weight: 400; }
+    .stat-value.empty { color: #6c7086; font-weight: 400; }
     .stat-value.path  {
       color: #a6e3a1;
-      font-size: 0.72rem;
+      font-size: 0.78rem;
       max-width: 140px;
       word-break: break-all;
       text-align: right;
@@ -214,8 +302,8 @@
       justify-content: space-between;
       padding: 0 20px;
     }
-    footer span { font-size: 0.7rem; color: #6c7086; letter-spacing: 0.03em; }
-    footer .author { color: #a6adc8; font-weight: 500; }
+    footer span { font-size: 0.72rem; color: #9399b2; letter-spacing: 0.03em; }
+    footer .author { color: #bac2de; font-weight: 500; }
     footer .author em { font-style: normal; color: #89b4fa; }
   </style>
 </head>
@@ -239,6 +327,14 @@
     <input type="range" id="slider-edges" min="10" max="48" value="16" step="1" />
     <span class="val" id="val-edges">16</span>
   </div>
+
+  <div class="divider"></div>
+
+  <div class="control-group">
+    <label>Descripción</label>
+    <input type="range" id="slider-desc" min="10" max="22" value="13" step="1" />
+    <span class="val" id="val-desc">13</span>
+  </div>
 </header>
 
 <!-- ── PANELES OVERLAY ─────────────────────────────────────── -->
@@ -249,12 +345,15 @@
 
     <div class="field">
       <label>Algoritmo</label>
-      <select id="sel-algorithm" disabled>
-        <option value="">— Próximamente —</option>
-        <option value="bfs">BFS · Búsqueda por amplitud</option>
-        <option value="dfs">DFS · Búsqueda por profundidad</option>
-        <option value="astar">A* · Heurística</option>
-      </select>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <select id="sel-algorithm" style="flex:1;">
+          <option value="">— Seleccionar —</option>
+          <option value="hill_climbing">Hill Climbing</option>
+          <option value="beam_search" disabled>Beam Search · próximamente</option>
+          <option value="supervised" disabled>Aprendizaje Supervisado · próximamente</option>
+        </select>
+        <button id="btn-info" title="Ver descripción del algoritmo">ℹ</button>
+      </div>
     </div>
 
     <div class="field">
@@ -276,6 +375,14 @@
     </div>
 
     <button id="btn-ejecutar" disabled>Ejecutar</button>
+    <button id="btn-limpiar">Limpiar resultado</button>
+
+    <!-- Descripción dinámica del algoritmo seleccionado -->
+    <div id="algo-description">
+      <div class="algo-desc-title" id="algo-desc-title"></div>
+      <div class="algo-desc-text" id="algo-desc-text"></div>
+      <div class="algo-warnings" id="algo-warnings"></div>
+    </div>
   </div>
 
   <!-- Panel derecho: estadísticas -->
@@ -309,6 +416,10 @@
       <span class="stat-label">Tiempo</span>
       <span class="stat-value empty" id="stat-time">—</span>
     </div>
+    <div class="stat-row" id="stat-result-row">
+      <span class="stat-label">Resultado</span>
+      <span class="stat-value" id="stat-result">—</span>
+    </div>
     <div class="stat-row">
       <span class="stat-label">Camino</span>
       <span class="stat-value path empty" id="stat-path">—</span>
@@ -329,15 +440,24 @@
 
     var nodeFontSize = parseInt(localStorage.getItem('font-nodes') || '20');
     var edgeFontSize = parseInt(localStorage.getItem('font-edges') || '16');
+    var descFontSize = parseInt(localStorage.getItem('font-desc')  || '13');
 
     var sliderNodes = document.getElementById('slider-nodes');
     var sliderEdges = document.getElementById('slider-edges');
+    var sliderDesc  = document.getElementById('slider-desc');
     var valNodes    = document.getElementById('val-nodes');
     var valEdges    = document.getElementById('val-edges');
+    var valDesc     = document.getElementById('val-desc');
+
     sliderNodes.value    = nodeFontSize;
     sliderEdges.value    = edgeFontSize;
+    sliderDesc.value     = descFontSize;
     valNodes.textContent = nodeFontSize;
     valEdges.textContent = edgeFontSize;
+    valDesc.textContent  = descFontSize;
+
+    // Aplicar tamaño inicial a la descripción
+    document.getElementById('algo-description').style.fontSize = descFontSize + 'px';
 
     // ── Colores base ──────────────────────────────────────────
     var COLOR_DEFAULT = { background: '#313244', border: '#89b4fa' };
@@ -482,6 +602,13 @@
       network.setOptions({ edges: { font: { size: s } } });
     });
 
+    sliderDesc.addEventListener('input', function () {
+      var s = parseInt(this.value);
+      valDesc.textContent = s;
+      localStorage.setItem('font-desc', s);
+      document.getElementById('algo-description').style.fontSize = s + 'px';
+    });
+
     // ── Guardar posiciones ────────────────────────────────────
     network.on('dragEnd', function (params) {
       if (params.nodes.length === 0) return;
@@ -522,11 +649,13 @@
     }
 
     function checkReady() {
-      var ready = currentStart && currentEnd && currentStart !== currentEnd;
+      var algo  = document.getElementById('sel-algorithm').value;
+      var ready = algo && currentStart && currentEnd && currentStart !== currentEnd;
       document.getElementById('btn-ejecutar').disabled = !ready;
     }
 
     selStart.addEventListener('change', function () {
+      clearResult();
       if (currentStart) resetNodeColor(currentStart);
       currentStart = this.value || null;
       if (currentStart) applyNodeColor(currentStart, COLOR_START);
@@ -535,6 +664,7 @@
     });
 
     selEnd.addEventListener('change', function () {
+      clearResult();
       if (currentEnd) resetNodeColor(currentEnd);
       currentEnd = this.value || null;
       if (currentEnd) applyNodeColor(currentEnd, COLOR_END);
@@ -542,15 +672,221 @@
       checkReady();
     });
 
-    // ── Botón ejecutar (listo para conectar con backend) ──────
-    document.getElementById('btn-ejecutar').addEventListener('click', function () {
-      // TODO: conectar con backend
-      console.log('Ejecutar:', {
-        algoritmo: document.getElementById('sel-algorithm').value,
-        inicio: currentStart,
-        fin: currentEnd
+    // ── Descripciones de algoritmos ───────────────────────────
+    var ALGO_INFO = {
+      'hill_climbing': {
+        title: 'Hill Climbing',
+        text: 'Algoritmo de búsqueda local. En cada paso elige al vecino no visitado con el menor peso de arista (decisión greedy local). No retrocede ni explora alternativas.',
+        warnings: [
+          'Puede quedar atascado en nodos hoja si no son el destino.',
+          'No garantiza encontrar la ruta óptima global.',
+          'Puede fallar si el camino exige pasar por aristas costosas localmente.',
+          'El único puente entre subgrafos es 6—14 (peso 77): rutas entre subgrafos dependen de alcanzarlo.'
+        ]
+      },
+      'beam_search': {
+        title: 'Beam Search',
+        text: 'Búsqueda informada que mantiene los k mejores candidatos (beam width) en cada nivel. Balancea exploración y eficiencia podando ramas menos prometedoras.',
+        warnings: [
+          'Un beam width pequeño puede descartar el camino óptimo.',
+          'No es completo: puede no encontrar solución aunque exista.',
+          'Mayor beam width = más preciso pero más costoso computacionalmente.'
+        ]
+      },
+      'supervised': {
+        title: 'Aprendizaje Supervisado',
+        text: 'Modelo entrenado para predecir el siguiente nodo en la ruta óptima dado el estado actual del grafo. Aprende de ejemplos de rutas calculadas previamente.',
+        warnings: [
+          'La calidad depende del conjunto de entrenamiento.',
+          'Puede generalizar mal en configuraciones del grafo no vistas.',
+          'Requiere fase de entrenamiento previa a la inferencia.'
+        ]
+      }
+    };
+
+    var descOpen = false;
+
+    function renderAlgoDescription(value) {
+      if (!value || !ALGO_INFO[value]) return;
+      var info = ALGO_INFO[value];
+      document.getElementById('algo-desc-title').textContent = info.title;
+      document.getElementById('algo-desc-text').textContent  = info.text;
+      var warningsEl = document.getElementById('algo-warnings');
+      warningsEl.innerHTML = '';
+      info.warnings.forEach(function (w) {
+        var div = document.createElement('div');
+        div.className = 'algo-warning';
+        div.innerHTML = '<span class="icon">⚠</span><span>' + w + '</span>';
+        warningsEl.appendChild(div);
+      });
+    }
+
+    function setDescVisible(visible) {
+      descOpen = visible;
+      var panel  = document.getElementById('algo-description');
+      var btn    = document.getElementById('btn-info');
+      if (visible) {
+        panel.classList.add('visible');
+        btn.classList.add('active');
+        btn.title = 'Ocultar descripción';
+      } else {
+        panel.classList.remove('visible');
+        btn.classList.remove('active');
+        btn.title = 'Ver descripción del algoritmo';
+      }
+    }
+
+    document.getElementById('sel-algorithm').addEventListener('change', function () {
+      renderAlgoDescription(this.value);
+      // Si ya estaba abierta y cambia el algoritmo, actualiza el contenido
+      if (descOpen && !this.value) setDescVisible(false);
+      updateStats();
+    });
+
+    document.getElementById('btn-info').addEventListener('click', function () {
+      var algo = document.getElementById('sel-algorithm').value;
+      if (!algo) return;
+      setDescVisible(!descOpen);
+    });
+
+    // ── Colores adicionales para resultado ───────────────────
+    var COLOR_PATH  = { background: '#2d2a1c', border: '#f9e2af' };  // amarillo — nodo en ruta
+    var COLOR_STUCK = { background: '#2d1c1c', border: '#fab387' };  // naranja  — nodo atascado
+    var EDGE_DEFAULT_COLOR = '#585b70';
+    var EDGE_PATH_COLOR    = '#f9e2af';
+
+    var lastResult = null;  // guarda el último resultado para poder limpiar
+
+    // Limpia el coloreado del resultado anterior (no toca inicio/fin)
+    function clearResult() {
+      if (!lastResult) return;
+      lastResult.path.forEach(function (id) {
+        if (id === currentStart) { applyNodeColor(id, COLOR_START); return; }
+        if (id === currentEnd)   { applyNodeColor(id, COLOR_END);   return; }
+        applyNodeColor(id, COLOR_DEFAULT);
+      });
+      // Restaurar color de todas las aristas
+      edges.forEach(function (e) {
+        edges.update({ id: e.id, color: { color: EDGE_DEFAULT_COLOR }, width: 2 });
+      });
+      // Limpiar stats de resultado
+      ['stat-cost','stat-visited','stat-length','stat-time','stat-path'].forEach(function (id) {
+        var el = document.getElementById(id);
+        el.textContent = '—';
+        el.className = el.id === 'stat-path' ? 'stat-value path empty' : 'stat-value empty';
+      });
+      document.getElementById('stat-result-row').classList.remove('visible');
+      document.getElementById('btn-limpiar').classList.remove('visible');
+      lastResult = null;
+    }
+
+    // Resalta el camino en el grafo
+    function highlightPath(path, found) {
+      // Colorear nodos del camino
+      path.forEach(function (id, i) {
+        if (id === currentStart) return;  // verde ya puesto
+        if (id === currentEnd && found) return;  // rojo ya puesto
+        var color = (!found && i === path.length - 1) ? COLOR_STUCK : COLOR_PATH;
+        applyNodeColor(id, color);
+      });
+
+      // Colorear aristas del camino
+      for (var i = 0; i < path.length - 1; i++) {
+        var a = path[i], b = path[i + 1];
+        edges.forEach(function (e) {
+          if ((e.from === a && e.to === b) || (e.from === b && e.to === a)) {
+            edges.update({ id: e.id, color: { color: EDGE_PATH_COLOR }, width: 4 });
+          }
+        });
+      }
+    }
+
+    // Actualiza el panel de estadísticas con la respuesta del backend
+    function showStats(data) {
+      var algoNames = { hill_climbing: 'Hill Climbing' };
+
+      // Resultado
+      var resultEl = document.getElementById('stat-result');
+      document.getElementById('stat-result-row').classList.add('visible');
+      if (data.found) {
+        resultEl.textContent = '✓ Encontrado';
+        resultEl.className = 'stat-value success';
+      } else {
+        resultEl.textContent = '✗ No encontrado';
+        resultEl.className = 'stat-value failure';
+      }
+
+      // Costo
+      var costEl = document.getElementById('stat-cost');
+      costEl.textContent = data.found ? data.cost : (data.cost + ' (parcial)');
+      costEl.className = 'stat-value' + (data.found ? '' : ' failure');
+
+      // Visitados
+      var visEl = document.getElementById('stat-visited');
+      visEl.textContent = data.visited_count;
+      visEl.className = 'stat-value';
+
+      // Longitud
+      var lenEl = document.getElementById('stat-length');
+      lenEl.textContent = data.found ? (data.path.length - 1) + ' aristas' : '—';
+      lenEl.className = 'stat-value' + (data.found ? '' : ' empty');
+
+      // Tiempo
+      var timeEl = document.getElementById('stat-time');
+      timeEl.textContent = data.time_ms + ' ms';
+      timeEl.className = 'stat-value';
+
+      // Camino
+      var pathEl = document.getElementById('stat-path');
+      pathEl.textContent = data.path.join(' → ');
+      pathEl.className = 'stat-value path' + (data.found ? '' : ' failure');
+    }
+
+    // ── Botón ejecutar ────────────────────────────────────────
+    var btnEjecutar = document.getElementById('btn-ejecutar');
+
+    btnEjecutar.addEventListener('click', function () {
+      var algo  = document.getElementById('sel-algorithm').value;
+      var btn   = this;
+
+      // Limpiar resultado anterior
+      clearResult();
+
+      // Estado cargando
+      btn.textContent = 'Ejecutando...';
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      fetch('http://localhost:8000/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algorithm: algo, start: currentStart, end: currentEnd })
+      })
+      .then(function (res) {
+        if (!res.ok) return res.json().then(function (e) { throw new Error(e.detail || 'Error del servidor'); });
+        return res.json();
+      })
+      .then(function (data) {
+        lastResult = data;
+        highlightPath(data.path, data.found);
+        showStats(data);
+        document.getElementById('btn-limpiar').classList.add('visible');
+      })
+      .catch(function (err) {
+        var resultEl = document.getElementById('stat-result');
+        document.getElementById('stat-result-row').classList.add('visible');
+        resultEl.textContent = '✗ ' + err.message;
+        resultEl.className = 'stat-value failure';
+      })
+      .finally(function () {
+        btn.textContent = 'Ejecutar';
+        btn.classList.remove('loading');
+        checkReady();
       });
     });
+
+    // ── Botón limpiar ─────────────────────────────────────────
+    document.getElementById('btn-limpiar').addEventListener('click', clearResult);
   });
 </script>
 

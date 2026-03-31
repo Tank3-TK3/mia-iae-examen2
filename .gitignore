@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ── Frontend ────────────────────────────────────────────────
+# frontend/libs/ se trackea intencionalmente (dependencia vendorizada, sin CDN)
+
+# Si en el futuro se agrega npm:
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs de browser/dev tools
+*.log

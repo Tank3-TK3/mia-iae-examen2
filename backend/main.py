@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from graph import GRAPH
-from algorithms import hill_climbing, hill_climbing_backtracking, decision_tree, beam_search
+from algorithms import hill_climbing, hill_climbing_backtracking, decision_tree, beam_search, q_learning
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -45,6 +45,7 @@ ALGORITHMS = {
     "hill_climbing_backtracking": hill_climbing_backtracking.run,
     "decision_tree":              decision_tree.run,
     "beam_search":                beam_search.run,
+    "q_learning":                 q_learning.run,
 }
 
 # ---------------------------------------------------------------------------

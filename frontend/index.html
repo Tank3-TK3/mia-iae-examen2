@@ -358,6 +358,7 @@
           <option value="hill_climbing_backtracking">Hill Climbing con Backtracking</option>
           <option value="decision_tree">Aprendizaje Supervisado — Árbol de Decisión</option>
           <option value="beam_search">Beam Search</option>
+          <option value="q_learning">Q-Learning (Aprendizaje por Refuerzo)</option>
         </select>
         <button id="btn-info" title="Ver descripción del algoritmo">ℹ</button>
       </div>
@@ -439,6 +440,10 @@
     <div class="stat-row" id="stat-beam-row" style="display:none;">
       <span class="stat-label">Ancho β usado</span>
       <span class="stat-value empty" id="stat-beam">—</span>
+    </div>
+    <div class="stat-row" id="stat-episodes-row" style="display:none;">
+      <span class="stat-label">Episodios RL</span>
+      <span class="stat-value empty" id="stat-episodes">—</span>
     </div>
     <div class="stat-row">
       <span class="stat-label">Camino</span>
@@ -745,6 +750,17 @@
           'Puede generalizar mal en configuraciones del grafo no vistas.',
           'Requiere fase de entrenamiento previa a la inferencia.'
         ]
+      },
+      'q_learning': {
+        title: 'Q-Learning (Aprendizaje por Refuerzo)',
+        text: 'Algoritmo de Aprendizaje por Refuerzo no supervisado. El agente explora el grafo por sí solo y aprende una tabla Q[nodo_actual][destino][siguiente] con el valor esperado de cada movimiento. Recompensa: −peso por cada arista recorrida, +500 al llegar al destino. Tras ~496,000 episodios (500 pasadas × 992 pares), la tabla converge y en inferencia el agente simplemente consulta qué nodo maximiza Q en cada paso.',
+        warnings: [
+          'α = 0.1 (learning rate): qué tanto actualiza cada experiencia. Bajo para no sobrescribir lo aprendido; alto para converger rápido. 0.1 es el estándar en Q-Learning.',
+          'γ = 0.99 (discount factor): cuánto valora recompensas futuras. Cercano a 1 para que la señal de llegada al destino se propague sin atenuarse en rutas largas.',
+          'ε-greedy: ε=1.0 al inicio (exploración total) → ε=0.01 al final (explotación). El agente descubre rutas al principio y las refina al final.',
+          'No supervisado: aprende explorando, sin dataset. Contrasta con el Árbol de Decisión que aprende de rutas precalculadas.',
+          'Garantiza la ruta de menor costo — único algoritmo del proyecto con esta garantía basada en aprendizaje. Tiempo reportado: solo inferencia.'
+        ]
       }
     };
 
@@ -835,6 +851,7 @@
       });
       document.getElementById('stat-result-row').classList.remove('visible');
       document.getElementById('stat-beam-row').style.display = 'none';
+      document.getElementById('stat-episodes-row').style.display = 'none';
       document.getElementById('btn-limpiar').classList.remove('visible');
       lastResult = null;
     }
@@ -904,6 +921,17 @@
         beamEl.className = 'stat-value';
       } else {
         beamRow.style.display = 'none';
+      }
+
+      // Episodios (solo q_learning)
+      var epsRow = document.getElementById('stat-episodes-row');
+      if (data.episodes !== undefined) {
+        epsRow.style.display = '';
+        var epsEl = document.getElementById('stat-episodes');
+        epsEl.textContent = data.episodes.toLocaleString();
+        epsEl.className = 'stat-value';
+      } else {
+        epsRow.style.display = 'none';
       }
 
       // Camino
